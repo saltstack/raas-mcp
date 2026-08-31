@@ -1,4 +1,4 @@
-"""VCF SSO / VIDB JWT validation for the RaaS MCP server.
+"""OIDC / VIDB JWT validation for the RaaS MCP server.
 
 Implements the VIDB JWT path described in specs/010-mcp-remote-transport/research.md
 Section 11 and data-model.md VidbJwtValidator.

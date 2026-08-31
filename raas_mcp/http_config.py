@@ -18,7 +18,7 @@ MAX_RAAS_TIMEOUT_SECONDS        cap on long-running RaaS calls (default: 60)
 TLS_ENABLED                     "true"/"1" to enable direct TLS (default: false)
 TLS_CERT_PATH                   path to PEM certificate for direct TLS
 TLS_KEY_PATH                    path to PEM private key for direct TLS
-VIDB_ISSUER_URL                 VIDB OIDC issuer URL for VCF SSO JWT validation
+VIDB_ISSUER_URL                 VIDB OIDC issuer URL for SSO JWT validation
                                 (empty string or absent = VIDB path disabled)
 VIDB_JWKS_REFRESH               JWKS cache TTL in seconds (default: 43200 = 12 h)
 """
@@ -60,7 +60,7 @@ class HttpServerConfig:
     tls_cert_path: str | None = None
     tls_key_path: str | None = None
 
-    # VCF SSO / VIDB JWT authentication (optional — disabled when issuer URL absent)
+    # OIDC / VIDB JWT SSO authentication (optional — disabled when issuer URL absent)
     vidb_issuer_url: str | None = None
     vidb_jwks_refresh_interval_seconds: int = 43200
 
@@ -131,7 +131,7 @@ def load() -> HttpServerConfig:
         if not tls_key_path:
             raise ValueError("TLS_KEY_PATH must be set when TLS_ENABLED=true")
 
-    # VIDB / VCF SSO configuration (optional)
+    # VIDB / OIDC SSO configuration (optional)
     # Treat empty string (rendered by Helm ConfigMap when not configured) as None.
     vidb_issuer_url: str | None = _str_env("VIDB_ISSUER_URL") or None
     vidb_jwks_refresh = _int_env("VIDB_JWKS_REFRESH", 43200)

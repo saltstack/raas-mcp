@@ -6,7 +6,7 @@ Builds an ASGI application with:
 - T019b: Auth wiring — BearerAuthBackend → AuthenticationMiddleware →
          AuthContextMiddleware; MCP endpoint (POST /mcp) behind RequireAuthMiddleware;
          per-request RaaS client built from token → TokenStore.lookup() (opaque path)
-         or VIDB JWT passthrough (VCF SSO path)
+         or VIDB JWT passthrough (OIDC SSO path)
 - T019c: CORSMiddleware as the outermost wrapper (when origins are configured)
 - T020:  SSE keepalive background task (heartbeat log lines + watchdog)
 - T046:  ``build_http_app_with_vidb()`` async factory that performs OIDC discovery

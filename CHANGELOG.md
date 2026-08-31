@@ -21,5 +21,5 @@
 
 - Initial implementation: stdio MCP server exposing the RaaS API catalog as
   MCP tools (spec 008), plus a Streamable HTTP transport for Kubernetes/VM
-  deployment with opaque-token and VCF SSO (VIDB JWT) authentication (spec
+  deployment with opaque-token and VIDB JWT (OIDC SSO) authentication (spec
   010).

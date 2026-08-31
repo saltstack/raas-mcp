@@ -16,7 +16,7 @@ same one implemented independently in the public ``raas-cli`` project's
    ``X-Xsrftoken: <xsrf>``.
 4. On ``401`` the client re-authenticates once and retries.
 
-VIDB JWT passthrough (VCF SSO) skips the login flow entirely: the caller's
+VIDB JWT passthrough (OIDC SSO) skips the login flow entirely: the caller's
 own JWT is forwarded unchanged as ``Authorization: Bearer <jwt>`` on every
 RPC call. RaaS validates it directly — see spec 010's VIDB integration.
 
@@ -104,7 +104,7 @@ class RaasClient:
         insecure: bool = False,
     ) -> "RaasClient":
         """Build a client that forwards *token* unchanged as ``Authorization:
-        Bearer <token>`` on every RPC call (VIDB JWT / VCF SSO passthrough).
+        Bearer <token>`` on every RPC call (VIDB JWT / OIDC SSO passthrough).
         No login flow is performed."""
         client = cls(server, timeout=timeout, insecure=insecure)
         client._bearer_token = token

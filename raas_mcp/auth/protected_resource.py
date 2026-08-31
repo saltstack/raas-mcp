@@ -7,7 +7,7 @@ The document contains:
 - ``resource``: canonical URI of this protected resource (from ``request.base_url``)
 - ``authorization_servers``: list of authorization server URIs;
     always contains ``<resource>/token`` first (opaque Basic-Auth path);
-    when VIDB is enabled, also contains the VIDB issuer URL (VCF SSO path).
+    when VIDB is enabled, also contains the VIDB issuer URL (OIDC SSO path).
 - ``bearer_methods_supported``: always ``["header"]``
 
 The response conforms to ``specs/010-mcp-remote-transport/contracts/protected-resource-metadata.schema.json``.
@@ -47,7 +47,7 @@ def build_protected_resource_handler(
         # First entry is always the server's own opaque /token endpoint.
         authorization_servers = [f"{resource}/token"]
 
-        # Second entry added when VIDB is enabled — VCF SSO callers use it to
+        # Second entry added when VIDB is enabled — OIDC SSO callers use it to
         # discover that they can present VIDB JWTs directly at POST /mcp.
         if (
             cfg.vidb_issuer_url

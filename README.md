@@ -259,14 +259,14 @@ OAuth resource server discovery.
 
 ---
 
-## VCF SSO (VIDB JWT) Configuration
+## OIDC / VIDB JWT SSO Configuration
 
 The MCP server supports **two authentication paths**:
 
 | Path | How it works |
 |---|---|
 | **Opaque token** (default) | Client exchanges RaaS credentials at `POST /token` for a short-lived Bearer token |
-| **VIDB JWT** (VCF SSO) | Client obtains a JWT directly from VIDB and presents it as a Bearer token without any exchange step |
+| **VIDB JWT** (OIDC SSO) | Client obtains a JWT directly from an OIDC issuer such as VIDB and presents it as a Bearer token without any exchange step |
 
 ### Enabling VIDB JWT authentication
 
@@ -275,14 +275,14 @@ Set `auth.vidb.issuerUrl` in your Helm values file:
 ```yaml
 auth:
   vidb:
-    issuerUrl: "https://vidb.vcf.example.com/oidc/<tenant-id>"
+    issuerUrl: "https://idp.example.com/oidc/<tenant-id>"
     jwksRefreshIntervalSeconds: 43200   # 12 h (default)
 ```
 
 Or via environment variable:
 
 ```bash
-VIDB_ISSUER_URL=https://vidb.vcf.example.com/oidc/<tenant-id>
+VIDB_ISSUER_URL=https://idp.example.com/oidc/<tenant-id>
 VIDB_JWKS_REFRESH=43200
 ```
 

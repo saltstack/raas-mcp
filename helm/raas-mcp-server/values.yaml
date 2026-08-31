@@ -63,7 +63,7 @@ config:
   approvalGate: ""
 
 # -------------------------------------------------------------------------
-# VCF SSO / VIDB JWT authentication (optional)
+# OIDC / VIDB JWT SSO authentication (optional)
 # Set auth.vidb.issuerUrl to activate the VIDB JWT path; leave empty to
 # use only the opaque /token path (HTTP Basic Auth exchange).
 # See specs/010-mcp-remote-transport/quickstart.md Section 5 for setup.
@@ -71,7 +71,7 @@ config:
 auth:
   vidb:
     # OIDC issuer URL for VIDB token validation.
-    # Example: https://vidb.vcf.example.com/oidc/tenant-id
+    # Example: https://idp.example.com/oidc/tenant-id
     # Empty string (default) disables the VIDB JWT path.
     issuerUrl: ""
     # JWKS cache TTL in seconds (min: 300, max: 86400, default: 43200 = 12 h)

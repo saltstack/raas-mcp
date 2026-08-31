@@ -65,7 +65,7 @@ Two independent Bearer-token paths, routed by
    token (`auth/token_store.py`). The server resolves the caller's stored
    credential on every subsequent call; the opaque token itself is never
    forwarded to RaaS.
-2. **VIDB JWT path (VCF SSO)** — `auth/vidb_auth.py::VidbJwtValidator`
+2. **VIDB JWT path (OIDC SSO)** — `auth/vidb_auth.py::VidbJwtValidator`
    discovers a tenant's JWKS via OIDC auto-discovery at startup and verifies
    incoming JWTs' signature/claims in place. No exchange step, no local
    token-store entry — the JWT's lifecycle belongs entirely to VIDB.

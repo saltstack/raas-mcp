@@ -5,7 +5,7 @@ Two authentication paths are supported:
 1. **Opaque path** (existing): callers exchange RaaS credentials for a short-lived
    opaque token at ``POST /token``; the token is looked up in ``TokenStore``.
 
-2. **VIDB JWT path** (new): VCF SSO callers present a VIDB-issued JWT directly;
+2. **VIDB JWT path** (new): OIDC SSO callers present a VIDB-issued JWT directly;
    ``VidbJwtValidator`` verifies the signature and claims without any exchange step.
 
 Routing logic

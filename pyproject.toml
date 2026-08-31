@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [{name = "raas-mcp contributors"}]
 maintainers = [{name = "raas-mcp contributors"}]
-keywords = ["salt", "saltstack", "raas", "mcp", "model-context-protocol", "vcf"]
+keywords = ["salt", "saltstack", "raas", "mcp", "model-context-protocol"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",

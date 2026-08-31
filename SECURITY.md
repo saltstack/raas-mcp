@@ -26,8 +26,8 @@ Bearer-token layer never becomes a way to impersonate someone else. Mitigations:
 - **Immediate invalidation on RaaS auth failure**: if RaaS rejects a stored
   credential mid-call (e.g. password rotated), the opaque Bearer token is
   invalidated immediately, forcing re-authentication.
-- **VIDB JWT passthrough is stateless**: when a caller authenticates via VCF
-  SSO (a VIDB-issued JWT), no local token-store entry is ever created — the
+- **VIDB JWT passthrough is stateless**: when a caller authenticates via
+  OIDC SSO (a VIDB-issued JWT), no local token-store entry is ever created — the
   JWT is verified in-place (JWKS signature check) and forwarded unchanged to
   RaaS on every call. Its lifecycle is managed entirely by VIDB, not by
   raas-mcp.
