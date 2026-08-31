@@ -31,7 +31,7 @@ class TestCredentialFields:
         cfg_path = _write_config(tmp_path, {"raas_url": "https://file-raas"})
         env = {"VCF_SALT_CONFIG": str(cfg_path), "RAASS_URL": "https://env-raas"}
         with patch.dict(os.environ, env, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()
@@ -43,7 +43,7 @@ class TestCredentialFields:
         for key in ("RAASS_URL", "SSE_RAAS_URL"):
             env[key] = ""
         with patch.dict(os.environ, env, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()
@@ -54,7 +54,7 @@ class TestMcpSpecificFields:
     def test_allowed_tools_null_by_default(self, tmp_path):
         cfg_path = _write_config(tmp_path, {"raas_url": "https://r"})
         with patch.dict(os.environ, {"VCF_SALT_CONFIG": str(cfg_path)}, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()
@@ -65,7 +65,7 @@ class TestMcpSpecificFields:
             tmp_path, {"raas_url": "https://r", "allowed_tools": ["ret_*", "tgt_*"]}
         )
         with patch.dict(os.environ, {"VCF_SALT_CONFIG": str(cfg_path)}, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()
@@ -74,7 +74,7 @@ class TestMcpSpecificFields:
     def test_approval_gate_empty_by_default(self, tmp_path):
         cfg_path = _write_config(tmp_path, {"raas_url": "https://r"})
         with patch.dict(os.environ, {"VCF_SALT_CONFIG": str(cfg_path)}, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()
@@ -85,7 +85,7 @@ class TestMcpSpecificFields:
             tmp_path, {"raas_url": "https://r", "approval_gate": ["cmd_*"]}
         )
         with patch.dict(os.environ, {"VCF_SALT_CONFIG": str(cfg_path)}, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()
@@ -94,7 +94,7 @@ class TestMcpSpecificFields:
     def test_missing_config_file_yields_defaults(self, tmp_path):
         nonexistent = str(tmp_path / "missing.yml")
         with patch.dict(os.environ, {"VCF_SALT_CONFIG": nonexistent}, clear=False):
-            from vcf_salt import user_config as uc
+            from raas_mcp import config_file as uc
             uc.invalidate_cache()
             from raas_mcp import server_config
             cfg = server_config.load()

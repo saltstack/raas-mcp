@@ -10,42 +10,31 @@ MCP-capable AI framework.
 
 ## Installation
 
+raas-mcp is fully self-contained — it has no dependency on any other repo
+checkout or internal-only package. Every runtime dependency
+(`mcp`, `httpx`, `starlette`, `uvicorn`, `PyJWT`, ...) is on public PyPI.
+
 ### Prerequisites
 
 - Python 3.11+
-- `vcf-salt` installed and configured (`mops/salt/vcf-salt/`)
-- `SSEApiClient` wheel or access to the Broadcom internal PyPI
 
 ### Quick start
 
 ```bash
-cd mops/salt/raas-mcp-server
+git clone https://github.com/saltstack/raas-mcp.git
+cd raas-mcp
 
 # 1. Create a virtual environment
 python3.11 -m venv .venv
 
-# 2. Install build tooling from the Broadcom internal PyPI
-PIP_INDEX_URL=https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple \
-  .venv/bin/pip install hatchling editables
+# 2. Install raas-mcp-server (+ dev/test extras)
+.venv/bin/pip install -e '.[dev]'
 
-# 3. Install vcf-salt (provides sseapiclient + credential/discovery helpers)
-PIP_INDEX_URL=https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple \
-  .venv/bin/pip install -e ../vcf-salt
-
-# 4. Install raas-mcp-server (+ test extras)
-PIP_INDEX_URL=https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple \
-  .venv/bin/pip install --no-build-isolation -e '.[test]'
-
-# 5. (Optional) install SSEApiClient from the vendor wheel
-#    .venv/bin/pip install /path/to/SSEApiClient-*.whl
-#    or from the Broadcom PyPI:
-#    PIP_INDEX_URL=... .venv/bin/pip install 'SSEApiClient>=8.18.4.0,<9'
-
-# 6. Verify
-raas-mcp-server --help   # should exit 0 with usage text
+# 3. Verify
+.venv/bin/raas-mcp-server --help   # should exit 0 with usage text
 ```
 
-Or use the convenience script (mirrors `vcf-salt` pattern):
+Or use the convenience script:
 
 ```bash
 ./scripts/setup-venv.sh     # creates .venv and installs everything
@@ -100,7 +89,7 @@ Add the following to `~/.cursor/mcp.json` (create if absent):
 {
   "mcpServers": {
     "raas": {
-      "command": "/absolute/path/to/mops/salt/raas-mcp-server/.venv/bin/raas-mcp-server",
+      "command": "/absolute/path/to/raas-mcp/.venv/bin/raas-mcp-server",
       "args": [],
       "env": {}
     }
@@ -221,7 +210,7 @@ raas-mcp-server --transport http
 ```bash
 # Add to your values.yaml
 helm upgrade --install raas-mcp \
-  mops/salt/raas-mcp-server/helm/raas-mcp-server \
+  ./helm/raas-mcp-server \
   --set config.raasUrl=https://salt-raas.example.com \
   --set ingress.enabled=true \
   --set ingress.hosts[0].host=mcp.example.com \
@@ -262,7 +251,7 @@ OAuth resource server discovery.
 ## Running tests
 
 ```bash
-cd mops/salt/raas-mcp-server
+.venv/bin/pip install -e '.[dev]'
 .venv/bin/pytest
 ```
 
@@ -322,12 +311,19 @@ For a full setup walkthrough see `specs/010-mcp-remote-transport/quickstart.md` 
 ## Project layout
 
 ```
-raas-mcp-server/
+raas-mcp/
 ├── raas_mcp/
 │   ├── __init__.py          # package version
 │   ├── auth/                # HTTP-mode auth (TokenStore, DualModeTokenVerifier, token_endpoint, protected_resource, vidb_auth)
 │   ├── catalog.py           # builds MCP Tool list from api_discovery.json
 │   ├── dispatcher.py        # validates params, checks approval gate, calls RaaS
+│   ├── raas_client.py       # vendored httpx-based RaaS RPC client (no SSEApiClient)
+│   ├── discovery.py         # loads the bundled api_discovery.json catalog
+│   ├── config_file.py       # ~/.salt/config.yml loader (shared with vcf-salt)
+│   ├── help_text.py         # tool description strings from RaaS RPC metadata
+│   ├── redact.py            # credential redaction for error messages/logs
+│   ├── data/
+│   │   └── api_discovery.json  # bundled RaaS RPC catalog (~200 resource/method pairs)
 │   ├── errors.py            # structured error/success result builders
 │   ├── http_config.py       # HttpServerConfig + load() from env vars
 │   ├── metrics.py           # Prometheus metrics + metrics_app
@@ -335,29 +331,27 @@ raas-mcp-server/
 │   ├── server_http.py       # Streamable HTTP ASGI app (spec-010)
 │   ├── server_config.py     # operator config loader (credentials + MCP keys)
 │   └── __main__.py          # python -m raas_mcp / raas-mcp-server --transport {stdio,http}
-├── tests/
-│   ├── conftest.py
-│   ├── test_catalog.py
-│   ├── test_dispatcher.py
-│   ├── test_http_config.py
-│   ├── test_http_transport.py
-│   ├── test_metrics.py
-│   ├── test_protected_resource.py
-│   ├── test_server_config.py
-│   ├── test_server_integration.py
-│   ├── test_token_endpoint.py
-│   ├── test_token_store.py
-│   ├── test_verifier.py
-│   └── test_vidb_auth.py
+├── tests/                   # unit + integration tests (pytest, respx, httpx.ASGITransport)
 ├── helm/
 │   └── raas-mcp-server/     # Helm chart (Chart.yaml, values.yaml, templates/)
 ├── scripts/
 │   ├── build-image.sh       # Docker image builder with --verify smoke test
-│   └── setup-venv.sh
-├── Dockerfile               # multi-stage build (builder + runtime)
+│   ├── check_release.py     # secret scan + version-match + smoke test (CI gate)
+│   ├── setup-venv.sh
+│   ├── setup-vscode-venv.sh
+│   └── refresh-cursor-token.sh
+├── .github/workflows/       # CI: lint+test matrix, release-check, docker, helm
+├── docs/
+│   ├── ARCHITECTURE.md
+│   └── BUILDING.md
+├── Dockerfile               # two-stage build (builder + runtime), public PyPI by default
 ├── .dockerignore
 ├── pyproject.toml
 ├── requirements.txt
 ├── pip.conf.example
+├── LICENSE
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CHANGELOG.md
 └── README.md
 ```

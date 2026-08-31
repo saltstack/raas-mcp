@@ -1,4 +1,4 @@
-"""Dispatch MCP tool calls to RaaS via sseapiclient.
+"""Dispatch MCP tool calls to RaaS via raas_mcp.raas_client.
 
 Validates parameters strictly, checks the approval gate (FR-015),
 dispatches to RaaS, and returns a structured result (FR-006/FR-007).
@@ -35,10 +35,7 @@ from raas_mcp.server_config import tool_is_gated
 
 _SENTINEL = object()
 
-try:
-    from vcf_salt.connection import connect_from_mapping  # type: ignore[import-untyped]
-except ImportError:
-    connect_from_mapping = None  # type: ignore[assignment]
+from raas_mcp.raas_client import connect_from_mapping
 
 
 async def dispatch(
@@ -67,12 +64,6 @@ async def dispatch(
     """
     # Resolve which client to use
     if client is _SENTINEL:
-        if connect_from_mapping is None:
-            return error_result(
-                ErrorCode.RAAS_RPC_ERROR,
-                "vcf_salt is not installed; HTTP transport mode requires the vendor wheel.",
-            )
-
         if vidb_jwt:
             # VIDB JWT path: forward the JWT as a Bearer token to RaaS
             if not raas_url:
@@ -226,7 +217,7 @@ async def _check_approval_gate(
 def _redact(message: str) -> str:
     """Best-effort removal of credentials from error messages."""
     try:
-        from vcf_salt.redact import redact_secrets
+        from raas_mcp.redact import redact_secrets
         return redact_secrets(message)
     except Exception:
         return message

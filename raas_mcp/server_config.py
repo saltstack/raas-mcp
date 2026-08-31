@@ -1,7 +1,8 @@
 """Operator configuration for raas-mcp-server.
 
-Reads credentials via ``vcf_salt.user_config`` (same precedence chain as
-``vcf-salt``) and reads the two MCP-specific keys ``allowed_tools`` and
+Reads credentials via ``raas_mcp.config_file`` (same precedence chain and
+``~/.salt/config.yml`` path as ``vcf-salt``, so both tools can share one
+config file) and reads the two MCP-specific keys ``allowed_tools`` and
 ``approval_gate`` directly from the raw YAML (bypassing ``_normalize`` which
 drops unknown keys).
 """
@@ -24,7 +25,7 @@ class ServerConfig:
 
 def load() -> ServerConfig:
     """Load server configuration from ``~/.salt/config.yml`` and env vars."""
-    from vcf_salt.user_config import (
+    from raas_mcp.config_file import (
         _load_raw,
         config_path,
         resolve_auth,

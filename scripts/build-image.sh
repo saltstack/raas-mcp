@@ -29,7 +29,7 @@ REGISTRY=""
 BASE_IMAGE="python:3.12-slim"
 PUSH=false
 VERIFY=false
-PIP_INDEX_URL="${PIP_INDEX_URL:-https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple}"
+PIP_INDEX_URL="${PIP_INDEX_URL:-}"
 
 # --------------------------------------------------------------------------- #
 # Argument parsing
@@ -61,14 +61,18 @@ fi
 
 echo "==> Building image: ${FULL_IMAGE}"
 echo "    Base image:      ${BASE_IMAGE}"
-echo "    PIP_INDEX_URL:   ${PIP_INDEX_URL}"
+echo "    PIP_INDEX_URL:   ${PIP_INDEX_URL:-(Dockerfile default: public PyPI)}"
 
 # --------------------------------------------------------------------------- #
 # Build
 # --------------------------------------------------------------------------- #
+BUILD_ARGS=(--build-arg "BASE_IMAGE=${BASE_IMAGE}")
+if [[ -n "${PIP_INDEX_URL}" ]]; then
+    BUILD_ARGS+=(--build-arg "PIP_INDEX_URL=${PIP_INDEX_URL}")
+fi
+
 docker build \
-    --build-arg "PIP_INDEX_URL=${PIP_INDEX_URL}" \
-    --build-arg "BASE_IMAGE=${BASE_IMAGE}" \
+    "${BUILD_ARGS[@]}" \
     --tag "${FULL_IMAGE}" \
     --file "${PROJECT_ROOT}/Dockerfile" \
     "${PROJECT_ROOT}"

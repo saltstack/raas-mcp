@@ -14,24 +14,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install project dependencies first (cache layer)
+# Install project dependencies first (cache layer). Defaults to public PyPI;
+# override with --build-arg PIP_INDEX_URL=... for an internal mirror.
 COPY requirements.txt .
-ARG PIP_INDEX_URL=https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple
+ARG PIP_INDEX_URL=https://pypi.org/simple
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install the package itself (no editable install in container)
+# Install the package itself (no editable install in container). raas_mcp is
+# fully self-contained (own raas_client.py, no SSEApiClient/vcf_salt needed).
 COPY pyproject.toml .
 COPY raas_mcp/ raas_mcp/
 RUN pip install --no-cache-dir --no-deps .
-
-# Install SSEApiClient (provides the sseapiclient module used by vcf_salt.connection)
-RUN pip install --no-cache-dir "SSEApiClient>=8.18.4.0,<9"
-
-# Install vcf_salt from source — SSEApiClient wheel does NOT expose the vcf_salt
-# module name, so we copy the local checkout which includes api_discovery.json
-COPY vcf_salt_src/ /build/vcf_salt/
-RUN cp -r /build/vcf_salt \
-      "$(python -c 'import site; print(site.getsitepackages()[0])')/vcf_salt"
 
 # --------------------------------------------------------------------------- #
 # Stage 2: runtime — minimal image                                            #
@@ -40,7 +33,8 @@ FROM python:3.12-slim AS runtime
 
 LABEL org.opencontainers.image.title="raas-mcp-server" \
       org.opencontainers.image.description="Salt RaaS MCP Server — Streamable HTTP transport" \
-      org.opencontainers.image.source="https://github.com/broadcom/salt"
+      org.opencontainers.image.source="https://github.com/saltstack/raas-mcp" \
+      org.opencontainers.image.licenses="Apache-2.0"
 
 # Non-root user
 RUN groupadd -r raas && useradd -r -g raas -d /app -s /sbin/nologin raas

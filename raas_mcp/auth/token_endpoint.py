@@ -58,7 +58,7 @@ def _validate_raas_credentials(
     exceptions so the token endpoint never leaks internal stack traces.
     """
     try:
-        from vcf_salt.connection import connect_from_mapping
+        from raas_mcp.raas_client import connect_from_mapping
 
         client = connect_from_mapping(
             {

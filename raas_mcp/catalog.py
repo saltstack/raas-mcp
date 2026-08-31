@@ -22,7 +22,7 @@ from mcp import types as mcp_types
 def _load_raw_discovery() -> dict[str, Any] | None:
     """Return the raw API discovery dict or None if unavailable."""
     try:
-        from vcf_salt.discovery_io import load_discovery_dict
+        from raas_mcp.discovery import load_discovery_dict
         return load_discovery_dict()
     except Exception:
         return None
@@ -50,7 +50,7 @@ def _object_schema_from_detailed(detailed: dict[str, Any]) -> dict[str, Any] | N
 def _build_description(resource: str, method: str, minfo: dict[str, Any]) -> str:
     """Return a concise description, falling back to 'resource.method'."""
     try:
-        from vcf_salt.help_text import build_rpc_command_help, is_generic_resource_doc
+        from raas_mcp.help_text import build_rpc_command_help, is_generic_resource_doc
         _full, short = build_rpc_command_help(resource, method, minfo)
         if short and not is_generic_resource_doc(short):
             return short
@@ -59,7 +59,7 @@ def _build_description(resource: str, method: str, minfo: dict[str, Any]) -> str
     formatted = (minfo.get("formatted") or "").strip()
     if formatted:
         try:
-            from vcf_salt.help_text import is_generic_resource_doc
+            from raas_mcp.help_text import is_generic_resource_doc
             if not is_generic_resource_doc(formatted):
                 return formatted.splitlines()[0][:90]
         except Exception:
@@ -68,7 +68,7 @@ def _build_description(resource: str, method: str, minfo: dict[str, Any]) -> str
     doc = (detailed.get("doc") or "").strip()
     if doc:
         try:
-            from vcf_salt.help_text import is_generic_resource_doc
+            from raas_mcp.help_text import is_generic_resource_doc
             if not is_generic_resource_doc(doc):
                 return doc.splitlines()[0][:90]
         except Exception:
@@ -108,8 +108,7 @@ def _get_catalog() -> dict[str, CatalogEntry]:
     if not raw:
         sys.exit(
             "raas-mcp-server: CATALOG_UNAVAILABLE — api_discovery.json is missing or empty. "
-            "Ensure vcf_salt is installed from the correct branch and that "
-            "mops/salt/vcf-salt/vcf_salt/data/api_discovery.json exists."
+            "Ensure raas_mcp/data/api_discovery.json exists in the installed package."
         )
 
     entries: dict[str, CatalogEntry] = {}

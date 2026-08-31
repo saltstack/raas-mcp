@@ -24,7 +24,7 @@ async def run() -> None:
     cfg = server_config.load()
 
     try:
-        from vcf_salt.connection import connect_from_mapping
+        from raas_mcp.raas_client import connect_from_mapping
         raas_client = connect_from_mapping(
             {
                 "raas": cfg.raas_url,

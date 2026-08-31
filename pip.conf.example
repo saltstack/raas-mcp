@@ -1,12 +1,16 @@
-# Broadcom internal PyPI (Artifactory). Copy or merge into your pip config, e.g.:
+# Optional: point pip at an internal PyPI mirror instead of the public
+# index, e.g. for corporate networks that block direct PyPI access.
+#
+# Copy or merge into your pip config, e.g.:
 #   macOS/Linux: ~/.config/pip/pip.conf   (or ~/.pip/pip.conf)
 # Or point pip at this file once:
-#   export PIP_CONFIG_FILE=/path/to/mops/salt/raas-mcp-server/pip.conf.example
+#   export PIP_CONFIG_FILE=/path/to/raas-mcp/pip.conf.example
 #
-# Same index as saltstack-raas-master (saltstack-pypi-virtual).
+# raas-mcp has no dependency that requires an internal index — this is
+# purely a network-access convenience, not a requirement.
 
 [global]
-index-url = https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple
+# index-url = https://your-internal-mirror.example.com/simple
 
 # Uncomment if your environment requires explicit host trust:
-# trusted-host = packages.vcfd.broadcom.net
+# trusted-host = your-internal-mirror.example.com
