@@ -1,0 +1,49 @@
+name: Helm validation
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  lint-and-template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: "v3.14.0"
+
+      - name: helm lint
+        run: helm lint helm/raas-mcp-server
+
+      - name: helm template (hpa disabled)
+        run: |
+          helm template raas-mcp helm/raas-mcp-server \
+            --set config.raasUrl=https://raas.example.com \
+            --set hpa.enabled=false > /tmp/rendered-no-hpa.yaml
+          grep -q "kind: Deployment" /tmp/rendered-no-hpa.yaml
+          ! grep -q "kind: HorizontalPodAutoscaler" /tmp/rendered-no-hpa.yaml
+
+      - name: helm template (hpa enabled — sticky-session annotations expected)
+        run: |
+          helm template raas-mcp helm/raas-mcp-server \
+            --set config.raasUrl=https://raas.example.com \
+            --set hpa.enabled=true \
+            --set ingress.enabled=true > /tmp/rendered-hpa.yaml
+          grep -q "kind: HorizontalPodAutoscaler" /tmp/rendered-hpa.yaml
+          grep -q "nginx.ingress.kubernetes.io/affinity" /tmp/rendered-hpa.yaml
+
+      - name: Validate rendered manifests are well-formed YAML/K8s objects
+        run: |
+          python3 - <<'PYEOF'
+          import sys, yaml
+          for path in ("/tmp/rendered-no-hpa.yaml", "/tmp/rendered-hpa.yaml"):
+              docs = list(yaml.safe_load_all(open(path)))
+              assert docs, f"{path} rendered no documents"
+              for doc in docs:
+                  assert doc.get("kind"), f"{path}: document missing 'kind'"
+                  assert doc.get("apiVersion"), f"{path}: document missing 'apiVersion'"
+          print("Rendered manifests are structurally valid Kubernetes objects.")
+          PYEOF

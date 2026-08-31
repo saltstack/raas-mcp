@@ -1,0 +1,43 @@
+name: Docker build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build-only validation — no push. Defaults to public PyPI inside the
+      # build (see Dockerfile); no internal index or registry credentials
+      # are required for this job.
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: raas-mcp-server:ci
+
+      - name: Smoke test (docker run + /health/live)
+        run: |
+          docker run --rm -d --name raas-mcp-ci -p 18080:8080 \
+            -e RAAS_URL=http://raas.invalid \
+            raas-mcp-server:ci --transport http
+          for i in $(seq 1 15); do
+            sleep 2
+            if curl -sf http://localhost:18080/health/live >/dev/null; then
+              echo "healthy"
+              docker stop raas-mcp-ci
+              exit 0
+            fi
+          done
+          echo "container did not become healthy" >&2
+          docker logs raas-mcp-ci
+          docker stop raas-mcp-ci
+          exit 1
