@@ -1,0 +1,12 @@
+# Broadcom internal PyPI (Artifactory). Copy or merge into your pip config, e.g.:
+#   macOS/Linux: ~/.config/pip/pip.conf   (or ~/.pip/pip.conf)
+# Or point pip at this file once:
+#   export PIP_CONFIG_FILE=/path/to/mops/salt/raas-mcp-server/pip.conf.example
+#
+# Same index as saltstack-raas-master (saltstack-pypi-virtual).
+
+[global]
+index-url = https://packages.vcfd.broadcom.net/artifactory/api/pypi/saltstack-pypi-virtual/simple
+
+# Uncomment if your environment requires explicit host trust:
+# trusted-host = packages.vcfd.broadcom.net

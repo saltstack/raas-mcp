@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "raas-mcp-server.fullname" . }}
+  labels:
+    {{- include "raas-mcp-server.labels" . | nindent 4 }}
+data:
+  RAAS_URL: {{ .Values.config.raasUrl | quote }}
+  RAAS_INSECURE: {{ .Values.config.raasInsecure | toString | quote }}
+  RAAS_TIMEOUT: {{ .Values.config.raasTimeout | quote }}
+  MCP_PORT: {{ .Values.config.mcpPort | toString | quote }}
+  METRICS_PORT: {{ .Values.config.metricsPort | toString | quote }}
+  TOKEN_TTL_SECONDS: {{ .Values.config.tokenTtlSeconds | toString | quote }}
+  CORS_ALLOWED_ORIGINS: {{ .Values.config.corsAllowedOrigins | quote }}
+  KEEPALIVE_INTERVAL: {{ .Values.config.keepaliveInterval | toString | quote }}
+  PRESTOP_DRAIN_SECONDS: {{ .Values.config.prestopDrainSeconds | toString | quote }}
+  MAX_RAAS_TIMEOUT_SECONDS: {{ .Values.config.maxRaasTimeoutSeconds | toString | quote }}
+  ALLOWED_TOOLS: {{ .Values.config.allowedTools | quote }}
+  APPROVAL_GATE: {{ .Values.config.approvalGate | quote }}
+  {{- if .Values.tls.enabled }}
+  TLS_ENABLED: "true"
+  TLS_CERT_PATH: {{ .Values.tls.certPath | quote }}
+  TLS_KEY_PATH: {{ .Values.tls.keyPath | quote }}
+  {{- end }}
+  {{- if .Values.auth }}
+  {{- if .Values.auth.vidb }}
+  VIDB_ISSUER_URL: {{ .Values.auth.vidb.issuerUrl | default "" | quote }}
+  VIDB_JWKS_REFRESH: {{ .Values.auth.vidb.jwksRefreshIntervalSeconds | default 43200 | toString | quote }}
+  {{- end }}
+  {{- end }}

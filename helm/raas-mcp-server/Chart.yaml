@@ -1,0 +1,13 @@
+apiVersion: v2
+name: raas-mcp-server
+description: Salt RaaS MCP Server — Streamable HTTP transport (spec-010)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - salt
+  - raas
+  - mcp
+  - model-context-protocol
+maintainers:
+  - name: Salt Platform Team

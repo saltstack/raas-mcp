@@ -1,0 +1,48 @@
+# Python artefacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Tests and development
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Dev tooling
+.ruff_cache/
+.mypy_cache/
+.tox/
+
+# CI
+.github/
+.cursor/
+
+# Helm / Kubernetes (not needed in the image)
+helm/
+
+# Documentation
+README.md
+CHANGELOG.md
+docs/
+
+# Local credentials — must never end up in an image
+.env
+.env.*
+*.env
+.env.raas.local
