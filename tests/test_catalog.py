@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -148,6 +147,7 @@ class TestBuildToolList:
 
     def test_build_tool_list_returns_mcp_tool_objects(self, minimal_discovery):
         from mcp import types as mcp_types
+
         import raas_mcp.catalog as catalog_mod
 
         with patch("raas_mcp.catalog._load_raw_discovery", return_value=minimal_discovery):

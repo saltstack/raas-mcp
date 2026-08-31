@@ -24,7 +24,10 @@ def main() -> None:
     init = (ROOT / "raas_mcp" / "__init__.py").read_text(encoding="utf-8")
     project_version = re.search(r'^version = "([^"]+)"', pyproject, re.M)
     module_version = re.search(r'^__version__ = "([^"]+)"', init, re.M)
-    if not project_version or not module_version or project_version.group(1) != module_version.group(1):
+    versions_match = (
+        project_version and module_version and project_version.group(1) == module_version.group(1)
+    )
+    if not versions_match:
         fail("pyproject and module versions do not match")
 
     banned_patterns = {
@@ -57,14 +60,15 @@ def main() -> None:
     # Smoke test: build the tool catalog and list a few known tools, in-process,
     # via the same in-memory MCP client/server helper used by
     # tests/test_server_integration.py — no real RaaS connection required.
-    import anyio
     from unittest.mock import MagicMock
 
+    import anyio
     from mcp import types as mcp_types
     from mcp.server import Server
     from mcp.shared.memory import create_connected_server_and_client_session
 
-    from raas_mcp import catalog as catalog_mod, dispatcher
+    from raas_mcp import catalog as catalog_mod
+    from raas_mcp import dispatcher
 
     async def _smoke() -> int:
         tool_list = catalog_mod.build_tool_list(allowed=None)

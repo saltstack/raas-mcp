@@ -10,7 +10,8 @@ The document contains:
     when VIDB is enabled, also contains the VIDB issuer URL (OIDC SSO path).
 - ``bearer_methods_supported``: always ``["header"]``
 
-The response conforms to ``specs/010-mcp-remote-transport/contracts/protected-resource-metadata.schema.json``.
+The response conforms to
+``specs/010-mcp-remote-transport/contracts/protected-resource-metadata.schema.json``.
 """
 
 from __future__ import annotations
@@ -27,8 +28,8 @@ if TYPE_CHECKING:
 
 def build_protected_resource_handler(
     *,
-    cfg: "HttpServerConfig",
-    vidb_validator: "VidbJwtValidator | None" = None,
+    cfg: HttpServerConfig,
+    vidb_validator: VidbJwtValidator | None = None,
 ) -> Any:
     """Return a Starlette route handler for ``GET /.well-known/oauth-protected-resource``.
 

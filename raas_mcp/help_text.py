@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 from typing import Any
 
-
 _LOADEDMOD_BOILERPLATE = "the loadedmod class allows for the module loaded onto the sub"
 
 
@@ -75,7 +74,9 @@ def _normalize_returns(text: str) -> str | None:
     return t
 
 
-def build_rpc_command_help(resource: str, method: str, minfo: dict[str, Any], *, max_chars: int = 16000) -> tuple[str, str]:
+def build_rpc_command_help(
+    resource: str, method: str, minfo: dict[str, Any], *, max_chars: int = 16000
+) -> tuple[str, str]:
     """
     Return (full_help, short_help) for a typed RPC subcommand.
 
@@ -120,7 +121,9 @@ def build_rpc_command_help(resource: str, method: str, minfo: dict[str, Any], *,
     return text, short
 
 
-def resource_help_from_body(resource: str, body: dict[str, Any], *, max_chars: int = 12000) -> tuple[str, str]:
+def resource_help_from_body(
+    resource: str, body: dict[str, Any], *, max_chars: int = 12000
+) -> tuple[str, str]:
     """Return (full_help, short_help) for a typed RPC command group."""
     raw_doc = (body.get("__doc__") or "").strip()
     methods = sorted(

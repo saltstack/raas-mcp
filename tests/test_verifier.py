@@ -12,14 +12,12 @@ Covers:
 from __future__ import annotations
 
 import time
-from unittest.mock import MagicMock
 
 import pytest
 
 from raas_mcp.auth.token_store import TokenStore
 from raas_mcp.auth.verifier import DualModeTokenVerifier
 from raas_mcp.auth.vidb_auth import VidbJwtValidator
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

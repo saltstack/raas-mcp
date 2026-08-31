@@ -29,7 +29,8 @@ the function, they never construct :class:`RaasClient` directly.
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import httpx
 
@@ -85,7 +86,7 @@ class RaasClient:
         config_name: str = "internal",
         timeout: float = 60.0,
         insecure: bool = False,
-    ) -> "RaasClient":
+    ) -> RaasClient:
         """Build a client that authenticates via the RaaS username/password flow."""
         client = cls(server, timeout=timeout, insecure=insecure)
         client._username = username
@@ -102,7 +103,7 @@ class RaasClient:
         *,
         timeout: float = 60.0,
         insecure: bool = False,
-    ) -> "RaasClient":
+    ) -> RaasClient:
         """Build a client that forwards *token* unchanged as ``Authorization:
         Bearer <token>`` on every RPC call (VIDB JWT / OIDC SSO passthrough).
         No login flow is performed."""
@@ -115,7 +116,7 @@ class RaasClient:
     # ------------------------------------------------------------------
 
     @property
-    def api(self) -> "_ApiProxy":
+    def api(self) -> _ApiProxy:
         """``client.api.<resource>.<method>(**kwargs)`` — matches the
         dynamic-attribute interface the old SSEApiClient-backed client
         exposed, so dispatcher.py / token_endpoint.py need no changes."""
@@ -148,7 +149,9 @@ class RaasClient:
         if response.status_code == 403:
             raise RaasApiError(f"403 Forbidden calling {resource}.{method}")
         if response.status_code >= 500:
-            raise RaasApiError(f"RaaS server error {response.status_code} calling {resource}.{method}")
+            raise RaasApiError(
+                f"RaaS server error {response.status_code} calling {resource}.{method}"
+            )
         if response.status_code >= 400:
             raise RaasApiError(f"RaaS RPC error {response.status_code} calling {resource}.{method}")
 
@@ -226,7 +229,9 @@ class RaasClient:
                 try:
                     resp = self._client.get(f"{self._server}{self._login_path}")
                 except httpx.RequestError as exc:
-                    raise RaasApiError(f"Cannot reach RaaS server at {self._server}: {exc}") from exc
+                    raise RaasApiError(
+                        f"Cannot reach RaaS server at {self._server}: {exc}"
+                    ) from exc
         self._extract_xsrf(resp)
 
         body = {
@@ -286,7 +291,8 @@ class RaasClient:
 
 
 class _MethodProxy:
-    """Callable wrapper: ``resource_proxy.method(**kwargs)`` → ``client.call(resource, method, **kwargs)``."""
+    """Callable wrapper: ``resource_proxy.method(**kwargs)`` →
+    ``client.call(resource, method, **kwargs)``."""
 
     def __init__(self, client: RaasClient, resource: str, method: str) -> None:
         self._client = client
@@ -343,7 +349,9 @@ def connect_from_mapping(m: Mapping[str, Any]) -> RaasClient:
 
     auth = m.get("auth")
     if not auth:
-        raise RaasApiError("connect_from_mapping: either 'auth' (user:pass) or 'auth_token' is required")
+        raise RaasApiError(
+            "connect_from_mapping: either 'auth' (user:pass) or 'auth_token' is required"
+        )
     parts = str(auth).split(":", 1)
     if len(parts) != 2 or not parts[0]:
         raise RaasApiError("connect_from_mapping: 'auth' must be 'USER:PASS'")

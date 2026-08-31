@@ -97,7 +97,9 @@ def _build_mcp_server(
         access_token = get_access_token()
         if access_token is None:
             from raas_mcp.errors import ErrorCode, error_result
-            return error_result(ErrorCode.RAAS_RPC_ERROR, "No authenticated user in request context")
+            return error_result(
+                ErrorCode.RAAS_RPC_ERROR, "No authenticated user in request context"
+            )
 
         bearer_token_str = access_token.token
 

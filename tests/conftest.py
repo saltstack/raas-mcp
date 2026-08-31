@@ -11,7 +11,6 @@ import pytest
 from raas_mcp.auth.token_store import TokenStore
 from raas_mcp.http_config import HttpServerConfig
 
-
 # ---------------------------------------------------------------------------
 # HTTP-mode shared fixtures (used by Phase 2+ tests)
 # ---------------------------------------------------------------------------

@@ -20,12 +20,14 @@ from __future__ import annotations
 import asyncio
 import base64
 import contextlib
-import json
-from unittest.mock import MagicMock, patch
+import time as _time
+from unittest.mock import patch
 
 import httpx
+import jwt as _jwt
 import pytest
-import pytest_asyncio
+from cryptography.hazmat.backends import default_backend as _default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa as _rsa
 
 from raas_mcp.auth.token_store import TokenStore
 from raas_mcp.http_config import HttpServerConfig
@@ -61,7 +63,7 @@ async def _lifespan(app):
         shutdown_request.set()
         try:
             await asyncio.wait_for(task, timeout=5.0)
-        except (asyncio.TimeoutError, asyncio.CancelledError, Exception):
+        except (TimeoutError, asyncio.CancelledError, Exception):
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
 
@@ -106,7 +108,9 @@ async def test_unauthenticated_mcp_returns_401(http_app):
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://test"
     ) as client:
-        resp = await client.post("/mcp", json={"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": {}})
+        resp = await client.post(
+            "/mcp", json={"jsonrpc": "2.0", "method": "initialize", "id": 1, "params": {}}
+        )
     assert resp.status_code == 401
 
 
@@ -167,7 +171,10 @@ async def test_authenticated_mcp_initialize(http_app):
                         "clientInfo": {"name": "test-client", "version": "0.0.1"},
                     },
                 },
-                headers={"Authorization": f"Bearer {token}", "Accept": "application/json, text/event-stream"},
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Accept": "application/json, text/event-stream",
+                },
             )
     assert resp.status_code == 200
 
@@ -187,7 +194,10 @@ async def test_authenticated_tools_list(http_app):
             resp = await client.post(
                 "/mcp",
                 json={"jsonrpc": "2.0", "method": "tools/list", "id": 2, "params": {}},
-                headers={"Authorization": f"Bearer {token}", "Accept": "application/json, text/event-stream"},
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Accept": "application/json, text/event-stream",
+                },
             )
     assert resp.status_code == 200
 
@@ -269,11 +279,6 @@ async def test_multi_user_distinct_tokens(http_app):
 # T022 VIDB scenarios (i–l)
 # ---------------------------------------------------------------------------
 
-import time as _time
-import jwt as _jwt
-from cryptography.hazmat.backends import default_backend as _default_backend
-from cryptography.hazmat.primitives.asymmetric import rsa as _rsa
-
 _VIDB_ISSUER_URL = "https://vidb.test/oidc/tenant"
 
 # Generate a fresh key pair at module load — avoids hardcoded PEM bytes.
@@ -301,7 +306,9 @@ def _vidb_token(*, exp_offset: int = 3600, ovl: bool = False) -> str:
 def _build_vidb_app(store: TokenStore) -> tuple:
     """Build an ASGI app with a pre-wired VidbJwtValidator (real key, no network)."""
     from unittest.mock import MagicMock
+
     from jwt import PyJWKClient
+
     from raas_mcp.auth.vidb_auth import VidbJwtValidator
     from raas_mcp.http_config import HttpServerConfig
 

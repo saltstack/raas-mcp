@@ -84,7 +84,7 @@ class VidbJwtValidator:
     # ------------------------------------------------------------------
 
     @classmethod
-    async def create(cls, cfg: "HttpServerConfig") -> "VidbJwtValidator":
+    async def create(cls, cfg: HttpServerConfig) -> VidbJwtValidator:
         """Async factory — discovers JWKS URI via OIDC and returns a validator.
 
         Always returns a ``VidbJwtValidator``; on discovery failure it returns

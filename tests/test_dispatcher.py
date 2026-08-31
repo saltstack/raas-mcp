@@ -16,7 +16,6 @@ import pytest
 from raas_mcp.catalog import CatalogEntry
 from raas_mcp.dispatcher import dispatch
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -127,7 +126,9 @@ async def test_http_path_builds_per_request_client():
     mock_per_request_client = MagicMock()
     mock_per_request_client.api.ret.get_minions.return_value = {"ret": ["m1"]}
 
-    with patch("raas_mcp.dispatcher.connect_from_mapping", return_value=mock_per_request_client) as mock_connect:
+    with patch(
+        "raas_mcp.dispatcher.connect_from_mapping", return_value=mock_per_request_client
+    ) as mock_connect:
         result = await dispatch(
             "ret_get_minions", {},
             catalog_entries=_catalog(entry),
@@ -245,7 +246,9 @@ async def test_vidb_path_builds_bearer_client():
     mock_per_request_client = MagicMock()
     mock_per_request_client.api.ret.get_minions.return_value = {"ret": ["m1"]}
 
-    with patch("raas_mcp.dispatcher.connect_from_mapping", return_value=mock_per_request_client) as mock_connect:
+    with patch(
+        "raas_mcp.dispatcher.connect_from_mapping", return_value=mock_per_request_client
+    ) as mock_connect:
         result = await dispatch(
             "ret_get_minions", {},
             catalog_entries=_catalog(entry),
