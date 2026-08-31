@@ -33,7 +33,6 @@ from raas_mcp.auth.token_store import TokenStore
 from raas_mcp.http_config import HttpServerConfig
 from raas_mcp.server_http import build_http_app
 
-
 # ---------------------------------------------------------------------------
 # Lifespan helper
 # ---------------------------------------------------------------------------
