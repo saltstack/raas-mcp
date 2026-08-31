@@ -18,7 +18,8 @@ from mcp.shared.memory import create_connected_server_and_client_session
 
 async def _make_server_session(mock_client: MagicMock, minimal_discovery: dict):
     """Build a live in-process MCP server/client pair with mocked dependencies."""
-    from raas_mcp import catalog as catalog_mod, dispatcher
+    from raas_mcp import catalog as catalog_mod
+    from raas_mcp import dispatcher
 
     # Rebuild catalog from minimal_discovery
     with patch("raas_mcp.catalog._load_raw_discovery", return_value=minimal_discovery):

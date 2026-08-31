@@ -1,0 +1,31 @@
+name: Security
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+
+      - name: Audit dependencies (pip-audit)
+        run: |
+          pip-audit --format json > audit.json || true
+          python scripts/check_audit_report.py audit.json
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: audit.json

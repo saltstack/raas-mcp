@@ -140,7 +140,8 @@ def resolve_timeout(cli_value: float | None) -> float:
 
 
 def resolve_insecure(cli_flag: bool) -> bool:
-    """True if ``--insecure`` was passed or config sets ``insecure: true`` / ``tls_verify: false``."""
+    """True if ``--insecure`` was passed, or config sets
+    ``insecure: true`` / ``tls_verify: false``."""
     if cli_flag:
         return True
     cfg = get_merged_user_config()

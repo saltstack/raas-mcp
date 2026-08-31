@@ -14,7 +14,6 @@ from typing import Any
 
 from mcp import types as mcp_types
 
-
 # ---------------------------------------------------------------------------
 # Internal helpers – allow tests to patch the discovery loader
 # ---------------------------------------------------------------------------

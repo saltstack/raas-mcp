@@ -17,6 +17,8 @@ def test_metrics_module_imports():
     )
     assert metrics_app is not None
     assert callable(track_request)
+    for metric in (ACTIVE_SESSIONS, REQUESTS_TOTAL, TOKEN_INVALIDATIONS_TOTAL, TOKEN_ISSUES_TOTAL):
+        assert metric is not None
 
 
 def test_track_request_increments_counter():

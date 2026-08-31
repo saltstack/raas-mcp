@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from raas_mcp.http_config import HttpServerConfig, load
-
+from raas_mcp.http_config import load
 
 # ---------------------------------------------------------------------------
 # a. Defaults from minimal env

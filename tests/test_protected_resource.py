@@ -10,11 +10,8 @@ Test scenarios as specified in tasks.md T014:
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.testclient import TestClient
@@ -22,7 +19,6 @@ from starlette.testclient import TestClient
 from raas_mcp.auth.protected_resource import build_protected_resource_handler
 from raas_mcp.auth.vidb_auth import VidbJwtValidator
 from raas_mcp.http_config import HttpServerConfig
-
 
 _VIDB_ISSUER = "https://vidb.test/oidc/tenant"
 

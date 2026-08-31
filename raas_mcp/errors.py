@@ -7,13 +7,13 @@ Every call_tool response body is a JSON object whose shape is defined in
 from __future__ import annotations
 
 import json
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from mcp import types
 
 
-class ErrorCode(str, Enum):
+class ErrorCode(StrEnum):
     UNKNOWN_TOOL = "UNKNOWN_TOOL"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     APPROVAL_REQUIRED = "APPROVAL_REQUIRED"

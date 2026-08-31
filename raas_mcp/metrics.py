@@ -13,7 +13,6 @@ that it is never reachable through the public MCP ingress.
 from __future__ import annotations
 
 import contextlib
-from typing import Any
 
 from prometheus_client import REGISTRY, Counter, Gauge, make_asgi_app
 

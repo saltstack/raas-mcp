@@ -36,8 +36,9 @@ htmlcov/
 # Helm / Kubernetes (not needed in the image)
 helm/
 
-# Documentation
-README.md
+# Documentation (README.md is NOT excluded: pyproject.toml's readme= field
+# requires it to be present in the build context for hatchling's metadata
+# build step — see Dockerfile's builder stage)
 CHANGELOG.md
 docs/
 

@@ -24,18 +24,16 @@ credential arguments are unused and the shared client is used as before.
 
 from __future__ import annotations
 
-import socket
 from typing import Any
 
 from mcp import types as mcp_types
 
 from raas_mcp.catalog import CatalogEntry
 from raas_mcp.errors import ErrorCode, error_result, success_result
+from raas_mcp.raas_client import connect_from_mapping
 from raas_mcp.server_config import tool_is_gated
 
 _SENTINEL = object()
-
-from raas_mcp.raas_client import connect_from_mapping
 
 
 async def dispatch(
@@ -151,7 +149,7 @@ async def dispatch(
         method_fn = getattr(resource_obj, entry.method)
         ret = method_fn(**arguments)
         return success_result(entry.resource, entry.method, ret)
-    except (ConnectionError, OSError, socket.error) as exc:
+    except (ConnectionError, OSError) as exc:
         return error_result(
             ErrorCode.RAAS_NETWORK_ERROR,
             _redact(f"Network error calling {entry.resource}.{entry.method}: {exc}"),

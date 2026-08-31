@@ -22,7 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Install the package itself (no editable install in container). raas_mcp is
 # fully self-contained (own raas_client.py, no SSEApiClient/vcf_salt needed).
-COPY pyproject.toml .
+# README.md and LICENSE are required inputs for hatchling's metadata build
+# (pyproject.toml declares readme = "README.md" / license-files = ["LICENSE"]).
+COPY pyproject.toml README.md LICENSE .
 COPY raas_mcp/ raas_mcp/
 RUN pip install --no-cache-dir --no-deps .
 

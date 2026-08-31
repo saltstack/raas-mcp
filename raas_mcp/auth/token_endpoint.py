@@ -14,7 +14,6 @@ Credentials are **never** stored in plaintext beyond the TokenEntry TTL.
 from __future__ import annotations
 
 import base64
-import json
 import logging
 from typing import Any
 
@@ -97,7 +96,10 @@ def build_token_handler(
         creds = _parse_basic_auth(request)
         if creds is None:
             return JSONResponse(
-                {"error": "invalid_request", "error_description": "Basic Authorization header required"},
+                {
+                    "error": "invalid_request",
+                    "error_description": "Basic Authorization header required",
+                },
                 status_code=400,
                 headers={"WWW-Authenticate": 'Basic realm="RaaS MCP"'},
             )
