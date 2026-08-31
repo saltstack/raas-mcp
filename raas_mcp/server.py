@@ -2,8 +2,8 @@
 
 Starts a stdio-transport MCP server that exposes every RaaS API
 resource/method pair as an MCP tool.  Credentials and configuration are
-read from ``~/.salt/config.yml`` (or ``VCF_SALT_CONFIG``) using the same
-precedence chain as ``vcf-salt``.
+read from ``~/.salt/config.yml`` (or ``RAAS_MCP_CONFIG`` to override the
+path) — see ``raas_mcp/config_file.py``.
 """
 
 from __future__ import annotations
@@ -86,7 +86,7 @@ def main() -> None:
             "etc.) via the mcp.json / claude_desktop_config.json configuration, not directly\n"
             "from the terminal.\n"
             "\n"
-            "Configuration is read from ~/.salt/config.yml (same as vcf-salt).\n"
+            "Configuration is read from ~/.salt/config.yml.\n"
             "See the README.md for full setup instructions."
         )
         sys.exit(0)

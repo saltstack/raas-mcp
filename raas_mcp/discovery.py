@@ -1,9 +1,8 @@
 """Load the bundled RaaS API discovery document.
 
-Replaces ``vcf_salt.discovery_io``. The catalog data itself
-(``raas_mcp/data/api_discovery.json``) is vendored from the ``vcf-salt``
-source rather than imported at runtime, so raas-mcp has no dependency on
-``vcf_salt`` being installed.
+The catalog data (``raas_mcp/data/api_discovery.json``) is vendored inside
+this package rather than imported from an external source at runtime, so
+raas-mcp has no dependency on any other package being installed.
 """
 
 from __future__ import annotations

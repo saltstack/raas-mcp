@@ -91,7 +91,7 @@ class TestDescriptionFallback:
         }
         catalog = _build_catalog(discovery)
         entry = catalog["foo_bar"]
-        # vcf_salt.help_text.build_rpc_command_help always produces at least
+        # help_text.build_rpc_command_help always produces at least
         # "RaaS — resource.method" as the short_help; both "foo.bar" and
         # "RaaS — foo.bar" are acceptable non-empty descriptions.
         assert entry.description  # non-empty

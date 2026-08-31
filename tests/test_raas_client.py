@@ -202,8 +202,8 @@ def test_from_bearer_401_does_not_reauth():
 @respx.mock
 def test_connect_from_mapping_auth_token_regression():
     """Regression test: connect_from_mapping({"auth_token": jwt}) must actually
-    reach RaaS as a Bearer header — this was silently dropped by the previous
-    vcf_salt.connection implementation."""
+    reach RaaS as a Bearer header — this was silently dropped by an earlier
+    internal implementation of this RaaS client wrapper."""
     rpc = respx.post(f"{SERVER}/rpc").mock(
         return_value=httpx.Response(200, json={"riq": 1, "ret": "ok", "error": None})
     )

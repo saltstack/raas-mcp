@@ -1,10 +1,9 @@
 """Operator configuration for raas-mcp-server.
 
-Reads credentials via ``raas_mcp.config_file`` (same precedence chain and
-``~/.salt/config.yml`` path as ``vcf-salt``, so both tools can share one
-config file) and reads the two MCP-specific keys ``allowed_tools`` and
-``approval_gate`` directly from the raw YAML (bypassing ``_normalize`` which
-drops unknown keys).
+Reads credentials via ``raas_mcp.config_file`` (``~/.salt/config.yml`` and
+its precedence chain) and reads the two MCP-specific keys ``allowed_tools``
+and ``approval_gate`` directly from the raw YAML (bypassing ``_normalize``
+which drops unknown keys).
 """
 
 from __future__ import annotations

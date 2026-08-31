@@ -1,9 +1,7 @@
 """Minimal RaaS RPC client on top of ``httpx`` — no SSEApiClient dependency.
 
-Replaces ``vcf_salt.connection.connect_from_mapping`` (which wrapped the
-Broadcom-internal ``sseapiclient.apiclient.APIClient``) with a small
-self-contained implementation of the same wire protocol, so raas-mcp has no
-runtime dependency on any non-public package.
+A small, self-contained implementation of the RaaS wire protocol, so
+raas-mcp has no runtime dependency on any non-public package.
 
 Wire protocol (mirrors the RaaS/Aria Automation Config "SSC" auth flow, the
 same one implemented independently in the public ``raas-cli`` project's
@@ -24,8 +22,7 @@ RPC call. RaaS validates it directly — see spec 010's VIDB integration.
 
 Public surface
 --------------
-``connect_from_mapping(mapping)`` is a drop-in replacement for
-``vcf_salt.connection.connect_from_mapping`` with the same call sites in
+``connect_from_mapping(mapping)`` is the single entry point used by
 ``dispatcher.py`` / ``auth/token_endpoint.py`` — those modules only import
 the function, they never construct :class:`RaasClient` directly.
 """
@@ -330,10 +327,11 @@ def connect_from_mapping(m: Mapping[str, Any]) -> RaasClient:
     - ``{"raas": url, "auth": "user:pass", "config_name": ..., "timeout": ...,
       "insecure": ...}`` → username/password login flow (:meth:`RaasClient.login`).
 
-    Note: this fixes a latent bug in the previous ``vcf_salt.connection``
-    implementation, where an ``auth_token`` mapping key was silently dropped
+    Note: an earlier internal implementation of this RaaS client wrapper had
+    a latent bug where an ``auth_token`` mapping key was silently dropped
     (never forwarded to RaaS) — the VIDB JWT passthrough path never actually
-    worked. See ``tests/test_raas_client.py`` for the regression test.
+    worked. This implementation fixes that; see ``tests/test_raas_client.py``
+    for the regression test.
     """
     server = str(m.get("raas") or "")
     timeout = float(m.get("timeout", 60.0))

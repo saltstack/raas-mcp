@@ -44,9 +44,9 @@ Or use the convenience script:
 
 ## Configuration
 
-All configuration lives in `~/.salt/config.yml` alongside your existing `vcf-salt` settings.
+All configuration lives in `~/.salt/config.yml`, following the same `~/.salt/` dotdir convention used across the Salt ecosystem.
 
-### Credential keys (shared with `vcf-salt`)
+### Credential keys
 
 ```yaml
 # ~/.salt/config.yml
@@ -319,7 +319,7 @@ raas-mcp/
 │   ├── dispatcher.py        # validates params, checks approval gate, calls RaaS
 │   ├── raas_client.py       # vendored httpx-based RaaS RPC client (no SSEApiClient)
 │   ├── discovery.py         # loads the bundled api_discovery.json catalog
-│   ├── config_file.py       # ~/.salt/config.yml loader (shared with vcf-salt)
+│   ├── config_file.py       # ~/.salt/config.yml loader
 │   ├── help_text.py         # tool description strings from RaaS RPC metadata
 │   ├── redact.py            # credential redaction for error messages/logs
 │   ├── data/
@@ -338,8 +338,7 @@ raas-mcp/
 │   ├── build-image.sh       # Docker image builder with --verify smoke test
 │   ├── check_release.py     # secret scan + version-match + smoke test (CI gate)
 │   ├── setup-venv.sh
-│   ├── setup-vscode-venv.sh
-│   └── refresh-cursor-token.sh
+│   └── setup-vscode-venv.sh
 ├── .github/workflows/       # CI: lint+test matrix, release-check, docker, helm
 ├── docs/
 │   ├── ARCHITECTURE.md

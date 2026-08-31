@@ -1,11 +1,10 @@
 """Operator defaults from ``~/.salt/config.yml`` (YAML).
 
-Trimmed from ``vcf_salt.user_config`` — keeps only what raas-mcp actually
-uses (``resolve_raas``/``resolve_auth``/``resolve_config_name``/
-``resolve_timeout``/``resolve_insecure``/``config_path``/``_load_raw``).
-The config file path and env var names (``RAASS_*``/``RAAS_*``,
-``VCF_SALT_CONFIG``) are kept unchanged so operators running both
-``vcf-salt`` and ``raas-mcp-server`` share a single config file.
+Follows the same ``~/.salt/`` dotdir convention used across the Salt
+ecosystem. Provides ``resolve_raas``/``resolve_auth``/``resolve_config_name``/
+``resolve_timeout``/``resolve_insecure``/``config_path``/``_load_raw``, with
+CLI value > environment variable (``RAASS_*``/``RAAS_*``) > config-file
+precedence. The path can be overridden with ``RAAS_MCP_CONFIG``.
 """
 
 from __future__ import annotations
@@ -16,7 +15,7 @@ from typing import Any
 
 import yaml
 
-# Override path with VCF_SALT_CONFIG (absolute or ~-expanded).
+# Override path with RAAS_MCP_CONFIG (absolute or ~-expanded).
 _DEFAULT_PATH = Path.home() / ".salt" / "config.yml"
 
 _cache_key: tuple[str | None, float | None] | None = None
@@ -24,7 +23,7 @@ _cache_cfg: dict[str, Any] | None = None
 
 
 def config_path() -> Path:
-    override = os.environ.get("VCF_SALT_CONFIG")
+    override = os.environ.get("RAAS_MCP_CONFIG")
     if override:
         return Path(override).expanduser()
     return _DEFAULT_PATH

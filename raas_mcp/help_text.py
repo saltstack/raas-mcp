@@ -139,7 +139,7 @@ def resource_help_from_body(resource: str, body: dict[str, Any], *, max_chars: i
             "Discovery often repeats a generic Salt LoadedMod line for every resource; "
             "this summary replaces it with a quick index.\n\n"
             f"Subcommands: {preview or '(none)'}\n\n"
-            f"Try  vcf-salt {resource} <subcommand> --help  for full docs from the server."
+            f"Call the `{resource}_<subcommand>` MCP tool for full docs from the server."
         )
         if n == 1:
             short = f"{resource}: 1 subcommand"

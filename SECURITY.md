@@ -37,8 +37,8 @@ Bearer-token layer never becomes a way to impersonate someone else. Mitigations:
 - raas-mcp never persists a raw RaaS username/password, opaque Bearer
   token, or VIDB JWT to disk.
 - stdio mode reads one operator-level credential from `~/.salt/config.yml`
-  (or `VCF_SALT_CONFIG`) for the lifetime of the process — the same file
-  and precedence chain used by `vcf-salt`.
+  (or `RAAS_MCP_CONFIG` to override the path) for the lifetime of the
+  process.
 - HTTP mode never stores a server-level RaaS credential in a ConfigMap,
   Secret, or Helm value (`FR-019`); every request carries its own
   credentials (an opaque Bearer token or a VIDB JWT).
