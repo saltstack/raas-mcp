@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------------- #
 # Stage 1: builder — install dependencies into a venv                        #
 # --------------------------------------------------------------------------- #
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 
@@ -31,7 +31,7 @@ RUN pip install --no-cache-dir --no-deps .
 # --------------------------------------------------------------------------- #
 # Stage 2: runtime — minimal image                                            #
 # --------------------------------------------------------------------------- #
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 LABEL org.opencontainers.image.title="raas-mcp-server" \
       org.opencontainers.image.description="Salt RaaS MCP Server — Streamable HTTP transport" \
