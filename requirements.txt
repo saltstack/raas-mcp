@@ -1,7 +1,7 @@
 # Pinned runtime dependencies (matches pyproject.toml [project] dependencies).
 # Resolved from public PyPI by default. If your network requires an internal
 # mirror, set PIP_INDEX_URL / use pip.conf.example before installing.
-mcp==1.27.0
+mcp==1.29.1
 pyyaml>=6.0.1
 prometheus-client==0.26.0
 starlette==1.6.0
