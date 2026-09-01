@@ -5,3 +5,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    ignore:
+      # mcp 2.x is a breaking major line (dispatcher/runner rewrite, Server
+      # constructor signature changed, mcp.shared.memory helpers removed).
+      # pyproject.toml intentionally caps this at <2 — bump deliberately via
+      # a tracked migration, not a routine dependabot PR. See PR #3.
+      - dependency-name: "mcp"
+        update-types: ["version-update:semver-major"]
