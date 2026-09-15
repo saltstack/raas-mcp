@@ -201,3 +201,6 @@ class TestBuildToolList:
             catalog_mod._CATALOG = None
             with pytest.raises(SystemExit):
                 catalog_mod.build_tool_list(allowed=None)
+
+    def test_intentional_failure():
+        assert False  # intentional failure to test branch protection
