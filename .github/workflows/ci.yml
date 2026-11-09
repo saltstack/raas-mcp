@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -28,3 +28,13 @@ jobs:
 
       - name: Test
         run: pytest --cov --cov-report=term-missing
+
+  # Aggregate job: branch protection requires a check named exactly
+  # "lint-and-test", but the matrix job reports as "test (3.x)".
+  lint-and-test:
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all matrix jobs to pass
+        run: test "${{ needs.test.result }}" = "success"
