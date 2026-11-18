@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import logging
 
-from mcp.server.auth.middleware.bearer_auth import AccessToken, TokenVerifier
+from mcp.server.auth.provider import AccessToken, TokenVerifier
 
 from raas_mcp.auth.token_store import TokenStore
 from raas_mcp.auth.vidb_auth import InvalidVidbTokenError, VidbJwtValidator
