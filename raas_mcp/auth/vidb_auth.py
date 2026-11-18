@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any
 
 import jwt
 from jwt import PyJWKClient, PyJWTError
-from mcp.server.auth.middleware.bearer_auth import AccessToken
+from mcp.server.auth.provider import AccessToken
 
 if TYPE_CHECKING:
     from raas_mcp.http_config import HttpServerConfig

@@ -25,7 +25,7 @@ import logging
 from typing import Any
 
 from mcp import types as mcp_types
-from mcp.server import Server
+from mcp.server import Server, ServerRequestContext
 from mcp.server.auth.middleware.auth_context import AuthContextMiddleware, get_access_token
 from mcp.server.auth.middleware.bearer_auth import (
     BearerAuthBackend,
@@ -82,17 +82,23 @@ def _build_mcp_server(
     vidb_validator: VidbJwtValidator | None,
 ) -> Server:
     """Build a low-level MCP Server with tool handlers that use per-request RaaS creds."""
-    server = Server("raas-mcp-server")
     tool_list = catalog.build_tool_list(allowed=cfg.allowed_tools)
     catalog_entries = catalog.get_catalog_entries(allowed=cfg.allowed_tools)
 
-    @server.list_tools()
-    async def _list_tools() -> list[mcp_types.Tool]:
-        return tool_list
+    async def _list_tools(
+        ctx: ServerRequestContext, params: mcp_types.PaginatedRequestParams | None
+    ) -> mcp_types.ListToolsResult:
+        return mcp_types.ListToolsResult(tools=tool_list)
 
-    @server.call_tool()
     async def _call_tool(
-        name: str, arguments: dict[str, Any] | None
+        ctx: ServerRequestContext, params: mcp_types.CallToolRequestParams
+    ) -> mcp_types.CallToolResult:
+        return mcp_types.CallToolResult(
+            content=await _dispatch_call(params.name, params.arguments or {})
+        )
+
+    async def _dispatch_call(
+        name: str, arguments: dict[str, Any]
     ) -> list[mcp_types.TextContent]:
         access_token = get_access_token()
         if access_token is None:
@@ -110,7 +116,7 @@ def _build_mcp_server(
             with metrics.track_request():
                 return await dispatch(
                     tool_name=name,
-                    arguments=arguments or {},
+                    arguments=arguments,
                     catalog_entries=catalog_entries,
                     approval_gate=cfg.approval_gate,
                     ctx=None,
@@ -122,21 +128,25 @@ def _build_mcp_server(
                     raas_timeout=cfg.raas_timeout,
                     token_store=token_store,
                 )
-        else:
-            # VIDB JWT path — forward the raw JWT as a Bearer token to RaaS
-            with metrics.track_request():
-                return await dispatch(
-                    tool_name=name,
-                    arguments=arguments or {},
-                    catalog_entries=catalog_entries,
-                    approval_gate=cfg.approval_gate,
-                    ctx=None,
-                    raas_url=cfg.raas_url,
-                    raas_insecure=cfg.raas_insecure,
-                    raas_timeout=cfg.raas_timeout,
-                    vidb_jwt=bearer_token_str,
-                )
+        # VIDB JWT path — forward the raw JWT as a Bearer token to RaaS
+        with metrics.track_request():
+            return await dispatch(
+                tool_name=name,
+                arguments=arguments,
+                catalog_entries=catalog_entries,
+                approval_gate=cfg.approval_gate,
+                ctx=None,
+                raas_url=cfg.raas_url,
+                raas_insecure=cfg.raas_insecure,
+                raas_timeout=cfg.raas_timeout,
+                vidb_jwt=bearer_token_str,
+            )
 
+    server = Server(
+        "raas-mcp-server",
+        on_list_tools=_list_tools,
+        on_call_tool=_call_tool,
+    )
     return server
 
 

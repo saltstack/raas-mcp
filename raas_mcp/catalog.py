@@ -191,7 +191,7 @@ def build_tool_list(allowed: list[str] | None) -> list[mcp_types.Tool]:
             mcp_types.Tool(
                 name=entry.tool_name,
                 description=entry.description,
-                inputSchema=entry.input_schema,
+                input_schema=entry.input_schema,
             )
         )
 
