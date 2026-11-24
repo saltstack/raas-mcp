@@ -25,8 +25,8 @@ if [[ -n "${PIP_INDEX_URL:-}" ]]; then
 fi
 
 test -x "$ROOT/.venv/bin/python" || "$PY" -m venv "$ROOT/.venv"
-"$ROOT/.venv/bin/pip" install "${INDEX_ARGS[@]}" -U pip
-"$ROOT/.venv/bin/pip" install "${INDEX_ARGS[@]}" -e "${editable}"
+"$ROOT/.venv/bin/pip" install ${INDEX_ARGS[@]+"${INDEX_ARGS[@]}"} -U pip
+"$ROOT/.venv/bin/pip" install ${INDEX_ARGS[@]+"${INDEX_ARGS[@]}"} -e "${editable}"
 
 echo ""
 echo "✓  venv ready at $ROOT/.venv"
