@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Migrated to the `mcp` python-sdk 2.x line (`mcp>=2.3.0,<3`, closes #9):
+  tool handlers are now passed to the `Server` constructor (`on_list_tools` /
+  `on_call_tool`), bearer-auth types are imported from
+  `mcp.server.auth.provider`, and the in-process tests and release check use
+  the unified `mcp.Client`. Removed the dependabot ignore rule for `mcp`
+  major bumps.
+
 - Extracted from the `mops` monorepo (`mops/salt/raas-mcp-server`) into a
   standalone repository.
 - Replaced the `vcf_salt`/`SSEApiClient` runtime dependency with a vendored,

@@ -58,14 +58,14 @@ def main() -> None:
                 fail(f"possible {label} in {path.relative_to(ROOT)}")
 
     # Smoke test: build the tool catalog and list a few known tools, in-process,
-    # via the same in-memory MCP client/server helper used by
+    # via the same in-memory mcp.Client/Server pairing used by
     # tests/test_server_integration.py — no real RaaS connection required.
     from unittest.mock import MagicMock
 
     import anyio
+    from mcp import Client
     from mcp import types as mcp_types
-    from mcp.server import Server
-    from mcp.shared.memory import create_connected_server_and_client_session
+    from mcp.server import Server, ServerRequestContext
 
     from raas_mcp import catalog as catalog_mod
     from raas_mcp import dispatcher
@@ -77,24 +77,31 @@ def main() -> None:
             fail("catalog produced zero tools from the bundled api_discovery.json")
 
         mock_client = MagicMock()
-        server = Server("raas-mcp-server-release-check")
+        async def _list_tools(
+            ctx: ServerRequestContext, params: mcp_types.PaginatedRequestParams | None
+        ) -> mcp_types.ListToolsResult:
+            return mcp_types.ListToolsResult(tools=tool_list)
 
-        @server.list_tools()
-        async def _list_tools() -> list[mcp_types.Tool]:
-            return tool_list
-
-        @server.call_tool()
-        async def _call_tool(name: str, arguments: dict) -> list[mcp_types.TextContent]:
-            return await dispatcher.dispatch(
-                tool_name=name,
-                arguments=arguments or {},
+        async def _call_tool(
+            ctx: ServerRequestContext, params: mcp_types.CallToolRequestParams
+        ) -> mcp_types.CallToolResult:
+            content = await dispatcher.dispatch(
+                tool_name=params.name,
+                arguments=params.arguments or {},
                 client=mock_client,
                 catalog_entries=catalog_entries,
                 approval_gate=[],
                 ctx=None,
             )
+            return mcp_types.CallToolResult(content=content)
 
-        async with create_connected_server_and_client_session(server) as session:
+        server = Server(
+            "raas-mcp-server-release-check",
+            on_list_tools=_list_tools,
+            on_call_tool=_call_tool,
+        )
+
+        async with Client(server) as session:
             result = await session.list_tools()
             if not result.tools:
                 fail("list_tools returned no tools over the MCP session")
