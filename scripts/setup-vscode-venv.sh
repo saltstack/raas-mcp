@@ -17,7 +17,7 @@ fi
 # shellcheck source=/dev/null
 source .venv/bin/activate
 
-python -m pip install "${INDEX_ARGS[@]}" -U pip hatchling editables >/dev/null
-python -m pip install "${INDEX_ARGS[@]}" --no-build-isolation -e '.[dev,test]'
+python -m pip install ${INDEX_ARGS[@]+"${INDEX_ARGS[@]}"} -U pip hatchling editables >/dev/null
+python -m pip install ${INDEX_ARGS[@]+"${INDEX_ARGS[@]}"} --no-build-isolation -e '.[dev,test]'
 
 echo "raas-mcp-server venv ready at ${ROOT}/.venv"
