@@ -1,8 +1,8 @@
 """In-process integration tests for the MCP server.
 
-Uses mcp.client.session.ClientSession with the in-memory transport provided
-by anyio memory streams to test the full list_tools / call_tool flow without
-starting a real subprocess or connecting to a live RaaS instance.
+Uses the unified mcp.Client connected directly to an in-process Server to test
+the full list_tools / call_tool flow without starting a real subprocess or
+connecting to a live RaaS instance.
 """
 
 from __future__ import annotations
@@ -11,9 +11,9 @@ import json
 from unittest.mock import MagicMock, patch
 
 import pytest
+from mcp import Client
 from mcp import types as mcp_types
-from mcp.server import Server
-from mcp.shared.memory import create_connected_server_and_client_session
+from mcp.server import Server, ServerRequestContext
 
 
 async def _make_server_session(mock_client: MagicMock, minimal_discovery: dict):
@@ -27,23 +27,27 @@ async def _make_server_session(mock_client: MagicMock, minimal_discovery: dict):
         tool_list = catalog_mod.build_tool_list(allowed=None)
         catalog_entries = catalog_mod.get_catalog_entries(allowed=None)
 
-    server = Server("raas-mcp-server-test")
+    async def _list_tools(
+        ctx: ServerRequestContext, params: mcp_types.PaginatedRequestParams | None
+    ) -> mcp_types.ListToolsResult:
+        return mcp_types.ListToolsResult(tools=tool_list)
 
-    @server.list_tools()
-    async def _list_tools() -> list[mcp_types.Tool]:
-        return tool_list
-
-    @server.call_tool()
-    async def _call_tool(name: str, arguments: dict) -> list[mcp_types.TextContent]:
-        return await dispatcher.dispatch(
-            tool_name=name,
-            arguments=arguments or {},
+    async def _call_tool(
+        ctx: ServerRequestContext, params: mcp_types.CallToolRequestParams
+    ) -> mcp_types.CallToolResult:
+        content = await dispatcher.dispatch(
+            tool_name=params.name,
+            arguments=params.arguments or {},
             client=mock_client,
             catalog_entries=catalog_entries,
             approval_gate=[],
             ctx=None,
         )
+        return mcp_types.CallToolResult(content=content)
 
+    server = Server(
+        "raas-mcp-server-test", on_list_tools=_list_tools, on_call_tool=_call_tool
+    )
     return server
 
 
@@ -52,7 +56,7 @@ class TestListTools:
     async def test_list_tools_contains_expected_names(self, mock_api_client, minimal_discovery):
         server = await _make_server_session(mock_api_client, minimal_discovery)
 
-        async with create_connected_server_and_client_session(server) as client_session:
+        async with Client(server) as client_session:
             result = await client_session.list_tools()
 
         names = {t.name for t in result.tools}
@@ -63,12 +67,12 @@ class TestListTools:
     async def test_tools_have_descriptions_and_schemas(self, mock_api_client, minimal_discovery):
         server = await _make_server_session(mock_api_client, minimal_discovery)
 
-        async with create_connected_server_and_client_session(server) as client_session:
+        async with Client(server) as client_session:
             result = await client_session.list_tools()
 
         for tool in result.tools:
             assert tool.description, f"Tool {tool.name} has empty description"
-            assert tool.inputSchema is not None, f"Tool {tool.name} has no inputSchema"
+            assert tool.input_schema is not None, f"Tool {tool.name} has no input_schema"
 
 
 class TestCallTool:
@@ -76,7 +80,7 @@ class TestCallTool:
     async def test_call_tool_success_returns_ok_json(self, mock_api_client, minimal_discovery):
         server = await _make_server_session(mock_api_client, minimal_discovery)
 
-        async with create_connected_server_and_client_session(server) as client_session:
+        async with Client(server) as client_session:
             result = await client_session.call_tool("ret_get_minions", {})
 
         assert result.content
@@ -91,7 +95,7 @@ class TestCallTool:
     ):
         server = await _make_server_session(mock_api_client, minimal_discovery)
 
-        async with create_connected_server_and_client_session(server) as client_session:
+        async with Client(server) as client_session:
             result = await client_session.call_tool(
                 "ret_get_minions", {"unknown_param": "x"}
             )
@@ -107,7 +111,7 @@ class TestCallTool:
     ):
         server = await _make_server_session(mock_api_client, minimal_discovery)
 
-        async with create_connected_server_and_client_session(server) as client_session:
+        async with Client(server) as client_session:
             result = await client_session.call_tool("no_such_tool", {})
 
         body = json.loads(result.content[0].text)

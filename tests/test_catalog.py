@@ -48,8 +48,8 @@ class TestInputSchemaExtraction:
 
         tool_map = {t.name: t for t in tools}
         cmd_tool = tool_map["cmd_route_cmd"]
-        assert cmd_tool.inputSchema is not None
-        props = cmd_tool.inputSchema.get("properties", {})
+        assert cmd_tool.input_schema is not None
+        props = cmd_tool.input_schema.get("properties", {})
         assert "tgt" in props
         assert "fun" in props
 
@@ -158,7 +158,7 @@ class TestBuildToolList:
             assert isinstance(tool, mcp_types.Tool)
             assert tool.name
             assert tool.description
-            assert tool.inputSchema is not None
+            assert tool.input_schema is not None
 
     # ---------------------------------------------------------------------------
     # T019 — allowlist filter tests (implementation added in T020)
