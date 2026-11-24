@@ -181,6 +181,14 @@ Key points:
 - The `/metrics` endpoint is served on a **separate port** (default: 9090)
   and must not be exposed via the public Ingress.
 
+### Install as a systemd service / connect Claude Code
+
+`scripts/install-systemd.sh` installs the HTTP server as a systemd service on
+Linux, and `scripts/claude-code-headers.sh` lets Claude Code authenticate with a
+RaaS username/password (or VIDB SSO). The full walkthrough - systemd, self-signed
+HTTPS, helper script, static token and OAuth/OIDC options, troubleshooting - is in
+[docs/CLAUDE_CODE_HTTP.md](docs/CLAUDE_CODE_HTTP.md).
+
 ### Environment variables (HTTP mode)
 
 | Variable | Default | Description |
