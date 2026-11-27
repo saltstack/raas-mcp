@@ -312,3 +312,48 @@ async def test_vidb_path_requires_raas_url():
     data = json.loads(result[0].text)
     assert data["ok"] is False
     assert data["error"]["code"] == "RAAS_RPC_ERROR"
+
+
+# ---------------------------------------------------------------------------
+# Per-request (HTTP) clients: blocking login and RPC must not block the event loop
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_http_path_does_not_block_event_loop():
+    import asyncio
+    import time
+
+    def slow_connect(_mapping):
+        time.sleep(0.5)  # blocking RaaS login
+        client = MagicMock()
+
+        def slow_rpc(**_kw):
+            time.sleep(0.5)  # blocking RaaS RPC
+            return {"ret": ["m1"]}
+
+        client.api.ret.get_minions.side_effect = slow_rpc
+        return client
+
+    ticks: list[float] = []
+
+    async def ticker():
+        while True:
+            ticks.append(time.monotonic())
+            await asyncio.sleep(0.05)
+
+    task = asyncio.create_task(ticker())
+    try:
+        with patch("raas_mcp.dispatcher.connect_from_mapping", side_effect=slow_connect):
+            result = await dispatch(
+                "ret_get_minions", {},
+                catalog_entries=_catalog(_entry()),
+                approval_gate=[],
+                ctx=None,
+                raas_user="u", raas_password="p", raas_url="http://raas.test",
+            )
+    finally:
+        task.cancel()
+    assert json.loads(result[0].text)["ok"] is True
+    # The call took ~1 s; a blocked loop would leave a gap of ~0.5 s between ticks.
+    gaps = [b - a for a, b in zip(ticks, ticks[1:], strict=False)]
+    assert len(ticks) > 10 and max(gaps) < 0.25, (len(ticks), max(gaps, default=None))
