@@ -24,6 +24,7 @@ credential arguments are unused and the shared client is used as before.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from mcp import types as mcp_types
@@ -60,7 +61,10 @@ async def dispatch(
     Returns a list containing exactly one TextContent whose ``.text`` is a
     JSON object matching ``contracts/mcp-tool-result.schema.json``.
     """
-    # Resolve which client to use
+    # Resolve which client to use. A per-request client (HTTP transport) is private to this call,
+    # so its blocking login and RPC run in worker threads and never stall the event loop. The shared
+    # client of the stdio transport is not thread-safe and is used as before.
+    per_request_client = client is _SENTINEL
     if client is _SENTINEL:
         if vidb_jwt:
             # VIDB JWT path: forward the JWT as a Bearer token to RaaS
@@ -70,13 +74,14 @@ async def dispatch(
                     "HTTP transport (VIDB path): raas_url is required.",
                 )
             try:
-                resolved_client = connect_from_mapping(
+                resolved_client = await asyncio.to_thread(
+                    connect_from_mapping,
                     {
                         "raas": raas_url,
                         "auth_token": vidb_jwt,
                         "timeout": raas_timeout,
                         "insecure": raas_insecure,
-                    }
+                    },
                 )
             except Exception as exc:
                 return error_result(
@@ -92,13 +97,14 @@ async def dispatch(
                     "when no shared client is provided.",
                 )
             try:
-                resolved_client = connect_from_mapping(
+                resolved_client = await asyncio.to_thread(
+                    connect_from_mapping,
                     {
                         "raas": raas_url,
                         "auth": f"{raas_user}:{raas_password}",
                         "timeout": raas_timeout,
                         "insecure": raas_insecure,
-                    }
+                    },
                 )
             except Exception as exc:
                 return error_result(
@@ -147,7 +153,10 @@ async def dispatch(
     try:
         resource_obj = getattr(resolved_client.api, entry.resource)
         method_fn = getattr(resource_obj, entry.method)
-        ret = method_fn(**arguments)
+        if per_request_client:
+            ret = await asyncio.to_thread(method_fn, **arguments)
+        else:
+            ret = method_fn(**arguments)
         return success_result(entry.resource, entry.method, ret)
     except (ConnectionError, OSError) as exc:
         return error_result(

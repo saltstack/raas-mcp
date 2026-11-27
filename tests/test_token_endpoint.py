@@ -119,3 +119,48 @@ def test_two_requests_produce_distinct_tokens():
         r1 = client.post("/token", headers={"Authorization": _basic_header("alice", "pw")})
         r2 = client.post("/token", headers={"Authorization": _basic_header("alice", "pw")})
     assert r1.json()["access_token"] != r2.json()["access_token"]
+
+
+# -----------------------------------------------------------------------
+# A slow RaaS login must not block the event loop (health checks, other requests)
+# -----------------------------------------------------------------------
+
+async def test_slow_credential_check_does_not_block_event_loop():
+    import asyncio
+    import time
+
+    import httpx
+
+    def slow_validate(*_args, **_kwargs):
+        time.sleep(0.8)  # a blocking RaaS login
+        return True
+
+    store = TokenStore(token_ttl_seconds=60)
+    handler = build_token_handler(store, raas_url="http://raas.test", raas_insecure=False)
+
+    async def token_route(request):
+        return await handler(request)
+
+    app = Starlette(routes=[Route("/token", token_route, methods=["POST"])])
+    transport = httpx.ASGITransport(app=app)
+
+    ticks: list[float] = []
+
+    async def ticker():  # stands in for /health/live, /mcp and other requests sharing the loop
+        while True:
+            ticks.append(time.monotonic())
+            await asyncio.sleep(0.05)
+
+    ticker_task = asyncio.create_task(ticker())
+    try:
+        target = "raas_mcp.auth.token_endpoint._validate_raas_credentials"
+        with patch(target, side_effect=slow_validate):
+            async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+                auth = {"Authorization": _basic_header("u", "p")}
+                resp = await client.post("/token", headers=auth)
+    finally:
+        ticker_task.cancel()
+    assert resp.status_code == 200
+    # The login took ~0.8 s; with the call on the event loop there is one ~0.8 s gap between ticks.
+    gaps = [b - a for a, b in zip(ticks, ticks[1:], strict=False)]
+    assert len(ticks) > 8 and max(gaps) < 0.3, (len(ticks), max(gaps, default=None))

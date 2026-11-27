@@ -13,6 +13,7 @@ Credentials are **never** stored in plaintext beyond the TokenEntry TTL.
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import logging
 from typing import Any
@@ -105,7 +106,11 @@ def build_token_handler(
             )
 
         raas_user, raas_password = creds
-        valid = _validate_raas_credentials(
+        # The RaaS login is synchronous (httpx.Client) and can take tens of seconds
+        # (a rejected login is slow on a loaded RaaS). Run it in a worker thread so the
+        # event loop keeps serving /health/*, /mcp and other /token requests meanwhile.
+        valid = await asyncio.to_thread(
+            _validate_raas_credentials,
             raas_url,
             raas_user,
             raas_password,

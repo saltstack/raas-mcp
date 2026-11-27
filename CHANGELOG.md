@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Fixed the HTTP server stalling while RaaS answers slowly: the `/token` credential
+  check and the per-request RaaS login and RPC in the dispatcher are synchronous
+  (`httpx.Client`) but ran inside async handlers, so one slow RaaS call blocked the
+  whole event loop (health probes, `/mcp`, other `/token` calls). A rejected login
+  took ~30 s on a loaded RaaS and, with the Helm chart's default liveness probe
+  (1 s timeout, 3 failures), got the pod restarted. They now run in worker threads
+  (`asyncio.to_thread`); the stdio transport's shared client is unchanged.
+
 - Migrated to the `mcp` python-sdk 2.x line (`mcp>=2.3.0,<3`, closes #9):
   tool handlers are now passed to the `Server` constructor (`on_list_tools` /
   `on_call_tool`), bearer-auth types are imported from
